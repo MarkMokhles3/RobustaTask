@@ -38,7 +38,7 @@ class RepositoriesViewController: UIViewController {
 
     // MARK: - Configure TableView
 
-    func  ConfigureTableView() {
+    func configureTableView() {
         repositoriesTableView.delegate = self
         repositoriesTableView.dataSource = self
         repositoriesTableView.register(UINib(nibName: String(describing: RepositoryTableViewCell.self), bundle: nil), forCellReuseIdentifier: String(describing: RepositoryTableViewCell.self))
@@ -153,6 +153,12 @@ extension RepositoriesViewController: UITableViewDelegate {
                 setPaginationRepositories(repositoriesPerPage: repositoriesPerPage)
             }
         }
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
+    {
+        let newViewController = RepositoriesDetailsViewController()
+        self.navigationController?.pushViewController(newViewController, animated: true)
     }
 }
 
