@@ -12,10 +12,13 @@ class RepositoriesViewController: UIViewController {
     // MARK: - iBOutlets
 
     @IBOutlet weak var repositoriesTableView: UITableView!
+    @IBOutlet weak var viewSearch: UIView!
+    @IBOutlet weak var txtFieldSearch: UITextField!
 
     // MARK: - iVars
 
     var repositories: [Repository] = []
+    var repositoriesWithoutFilteration: [Repository] = []
 
     // MARK: - Pagination iVars
 
@@ -27,9 +30,9 @@ class RepositoriesViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
         self.title = "Repositories List"
         getRepositories()
+        setUpSearchView()
         ConfigureTableView()
     }
 
@@ -41,6 +44,18 @@ class RepositoriesViewController: UIViewController {
         repositoriesTableView.register(UINib(nibName: String(describing: RepositoryTableViewCell.self), bundle: nil), forCellReuseIdentifier: String(describing: RepositoryTableViewCell.self))
     }
 
+    // MARK: - SetUp SearchView
+
+    func setUpSearchView() {
+        viewSearch.backgroundColor = .darkGray
+        viewSearch.setCornerRadius(radius:10)
+        txtFieldSearch.font = UIFont(name: "regualar", size: 17)
+        txtFieldSearch.keyboardType = .default
+        txtFieldSearch.attributedPlaceholder = NSAttributedString(string: "Search for repository",
+                                                                  attributes: [NSAttributedString.Key.foregroundColor: UIColor.gray])
+        txtFieldSearch.addTarget(self, action: #selector(self.textFieldDidChange(_:)), for: .editingChanged)
+    }
+
     // MARK: - GetRepositories
 
     func getRepositories() {
@@ -49,6 +64,7 @@ class RepositoriesViewController: UIViewController {
                 return
             }
             self.repositories = repositories
+            self.repositoriesWithoutFilteration = repositories
             self.limit = self.repositories.count
 
             for i in 0...10 {
@@ -78,6 +94,28 @@ class RepositoriesViewController: UIViewController {
                 paginationRepositories.append(repositories[i])
             }
             self.repositoriesPerPage += 10
+        }
+
+        DispatchQueue.main.async {
+            self.repositoriesTableView.reloadData()
+        }
+    }
+
+    // MARK: - TextField DidChange
+
+    @objc func textFieldDidChange(_ textField: UITextField) {
+        var filterdItemsArray = [Repository]()
+        func filterContentForSearchText(searchText: String) {
+            filterdItemsArray = repositoriesWithoutFilteration.filter { item in
+                return (item.repositoryName?.lowercased().contains(searchText.lowercased()))!
+            }
+        }
+        if textField.text == "" {
+            filterContentForSearchText(searchText: textField.text ?? "")
+            paginationRepositories = repositoriesWithoutFilteration
+        } else if textField.text?.count ?? 0 >= 2 {
+            filterContentForSearchText(searchText: textField.text ?? "")
+            paginationRepositories = filterdItemsArray
         }
 
         DispatchQueue.main.async {
@@ -115,5 +153,15 @@ extension RepositoriesViewController: UITableViewDelegate {
                 setPaginationRepositories(repositoriesPerPage: repositoriesPerPage)
             }
         }
+    }
+}
+
+// MARK: - TextField Delegate
+
+extension RepositoriesViewController: UITextFieldDelegate {
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
 }
