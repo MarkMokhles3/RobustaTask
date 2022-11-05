@@ -17,6 +17,12 @@ class RepositoriesViewController: UIViewController {
 
     var repositories: [Repository] = []
 
+    // MARK: - Pagination iVars
+
+    var repositoriesPerPage = 10
+    var limit = 10
+    var paginationRepositories: [Repository] = []
+
     // MARK: - View Life Cycle
 
     override func viewDidLoad() {
@@ -43,9 +49,39 @@ class RepositoriesViewController: UIViewController {
                 return
             }
             self.repositories = repositories
+            self.limit = self.repositories.count
+
+            for i in 0...10 {
+                self.paginationRepositories.append(repositories[i])
+            }
+
             DispatchQueue.main.async {
                 self.repositoriesTableView.reloadData()
             }
+        }
+    }
+
+    // MARK: - Get PaginationRepositories
+
+    func setPaginationRepositories(repositoriesPerPage: Int) {
+        if repositoriesPerPage >= limit {
+            return
+        }
+        else if repositoriesPerPage >= limit - 10 {
+            for i in repositoriesPerPage..<limit {
+                paginationRepositories.append(repositories[i])
+            }
+            self.repositoriesPerPage += 10
+
+        } else {
+            for i in repositoriesPerPage..<repositoriesPerPage + 10 {
+                paginationRepositories.append(repositories[i])
+            }
+            self.repositoriesPerPage += 10
+        }
+
+        DispatchQueue.main.async {
+            self.repositoriesTableView.reloadData()
         }
     }
 }
@@ -54,14 +90,14 @@ class RepositoriesViewController: UIViewController {
 
 extension RepositoriesViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        repositories.count
+        paginationRepositories.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = repositoriesTableView.dequeueReusableCell(withIdentifier: String(describing: RepositoryTableViewCell.self), for: indexPath) as?  RepositoryTableViewCell else {
             return UITableViewCell()
         }
-        cell.configureCell(with: repositories[indexPath.row])
+        cell.configureCell(with: paginationRepositories[indexPath.row])
 
         return cell
     }
@@ -69,4 +105,15 @@ extension RepositoriesViewController: UITableViewDataSource {
 
 //MARK: - TableView Delegate
 
-extension RepositoriesViewController: UITableViewDelegate {}
+extension RepositoriesViewController: UITableViewDelegate {
+
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+
+        if scrollView == repositoriesTableView {
+            if (scrollView.contentOffset.y + scrollView.frame.size.height) >= scrollView.contentSize.height {
+
+                setPaginationRepositories(repositoriesPerPage: repositoriesPerPage)
+            }
+        }
+    }
+}
