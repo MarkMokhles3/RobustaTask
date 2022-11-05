@@ -19,6 +19,8 @@
 		08F8AE35291597F8009D5D79 /* Owner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08F8AE34291597F8009D5D79 /* Owner.swift */; };
 		08F8AE3E2915BD51009D5D79 /* RepositoriesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08F8AE3C2915BD51009D5D79 /* RepositoriesViewController.swift */; };
 		08F8AE3F2915BD51009D5D79 /* RepositoriesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 08F8AE3D2915BD51009D5D79 /* RepositoriesViewController.xib */; };
+		08F8AE4629166FE5009D5D79 /* UIImageView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08F8AE4529166FE5009D5D79 /* UIImageView+Extension.swift */; };
+		08F8AE4829167015009D5D79 /* UIView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08F8AE4729167015009D5D79 /* UIView+Extension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +38,8 @@
 		08F8AE34291597F8009D5D79 /* Owner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Owner.swift; sourceTree = "<group>"; };
 		08F8AE3C2915BD51009D5D79 /* RepositoriesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoriesViewController.swift; sourceTree = "<group>"; };
 		08F8AE3D2915BD51009D5D79 /* RepositoriesViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RepositoriesViewController.xib; sourceTree = "<group>"; };
+		08F8AE4529166FE5009D5D79 /* UIImageView+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView+Extension.swift"; sourceTree = "<group>"; };
+		08F8AE4729167015009D5D79 /* UIView+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Extension.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,6 +74,7 @@
 			children = (
 				08F8AE1429141286009D5D79 /* AppDelegate.swift */,
 				08F8AE1629141286009D5D79 /* SceneDelegate.swift */,
+				08F8AE4429166FB1009D5D79 /* Extensions */,
 				08F8AE33291597E0009D5D79 /* Model */,
 				08F8AE2A29142A32009D5D79 /* Views */,
 				08F8AE3A2915B89E009D5D79 /* Controllers */,
@@ -139,6 +144,15 @@
 				08F8AE3D2915BD51009D5D79 /* RepositoriesViewController.xib */,
 			);
 			path = RepositoriesViewController;
+			sourceTree = "<group>";
+		};
+		08F8AE4429166FB1009D5D79 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				08F8AE4529166FE5009D5D79 /* UIImageView+Extension.swift */,
+				08F8AE4729167015009D5D79 /* UIView+Extension.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -217,9 +231,11 @@
 				08F8AE1529141286009D5D79 /* AppDelegate.swift in Sources */,
 				08F8AE35291597F8009D5D79 /* Owner.swift in Sources */,
 				08F8AE3E2915BD51009D5D79 /* RepositoriesViewController.swift in Sources */,
+				08F8AE4829167015009D5D79 /* UIView+Extension.swift in Sources */,
 				08F8AE3229145D3C009D5D79 /* APIService.swift in Sources */,
 				08F8AE1729141286009D5D79 /* SceneDelegate.swift in Sources */,
 				08F8AE2E29142A6C009D5D79 /* RepositoryTableViewCell.swift in Sources */,
+				08F8AE4629166FE5009D5D79 /* UIImageView+Extension.swift in Sources */,
 				08F8AE2929142944009D5D79 /* Repository.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
