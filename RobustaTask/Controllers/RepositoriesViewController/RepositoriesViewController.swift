@@ -9,36 +9,44 @@ import UIKit
 
 class RepositoriesViewController: UIViewController {
 
+    init(viewModel: RepositoriesViewModelProtocol) {
+        self.viewModel = viewModel
+        super.init(nibName: "\(RepositoriesViewController.self)", bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+
+
     // MARK: - iBOutlets
 
-    @IBOutlet weak var repositoriesTableView: UITableView!
-    @IBOutlet weak var viewSearch: UIView!
-    @IBOutlet weak var txtFieldSearch: UITextField!
+    @IBOutlet private weak var repositoriesTableView: UITableView!
+    @IBOutlet private weak var viewSearch: UIView!
+    @IBOutlet private weak var txtFieldSearch: UITextField!
 
     // MARK: - iVars
 
-    var repositories: [Repository] = []
-    var repositoriesWithoutFilteration: [Repository] = []
-
-    // MARK: - Pagination iVars
-
-    var repositoriesPerPage = 10
-    var limit = 10
-    var paginationRepositories: [Repository] = []
+    private var viewModel: RepositoriesViewModelProtocol
 
     // MARK: - View Life Cycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = "Repositories List"
-        getRepositories()
         setUpSearchView()
-        ConfigureTableView()
+        configureTableView()
+        viewModel.onDataUpdate = {
+            DispatchQueue.main.async { [weak self] in
+                self?.repositoriesTableView.reloadData()
+            }
+        }
     }
 
     // MARK: - Configure TableView
 
-    func configureTableView() {
+    private func configureTableView() {
         repositoriesTableView.delegate = self
         repositoriesTableView.dataSource = self
         repositoriesTableView.register(UINib(nibName: String(describing: RepositoryTableViewCell.self), bundle: nil), forCellReuseIdentifier: String(describing: RepositoryTableViewCell.self))
@@ -46,7 +54,7 @@ class RepositoriesViewController: UIViewController {
 
     // MARK: - SetUp SearchView
 
-    func setUpSearchView() {
+    private func setUpSearchView() {
         viewSearch.backgroundColor = .darkGray
         viewSearch.setCornerRadius(radius:10)
         txtFieldSearch.font = UIFont(name: "regualar", size: 17)
@@ -56,71 +64,10 @@ class RepositoriesViewController: UIViewController {
         txtFieldSearch.addTarget(self, action: #selector(self.textFieldDidChange(_:)), for: .editingChanged)
     }
 
-    // MARK: - GetRepositories
-
-    func getRepositories() {
-        APIService.sharedService.getReprositories { (repositories: [Repository]?, error) in
-            guard let repositories = repositories else {
-                return
-            }
-            self.repositories = repositories
-            self.repositoriesWithoutFilteration = repositories
-            self.limit = self.repositories.count
-
-            for i in 0...10 {
-                self.paginationRepositories.append(repositories[i])
-            }
-
-            DispatchQueue.main.async {
-                self.repositoriesTableView.reloadData()
-            }
-        }
-    }
-
-    // MARK: - Get PaginationRepositories
-
-    func setPaginationRepositories(repositoriesPerPage: Int) {
-        if repositoriesPerPage >= limit {
-            return
-        }
-        else if repositoriesPerPage >= limit - 10 {
-            for i in repositoriesPerPage..<limit {
-                paginationRepositories.append(repositories[i])
-            }
-            self.repositoriesPerPage += 10
-
-        } else {
-            for i in repositoriesPerPage..<repositoriesPerPage + 10 {
-                paginationRepositories.append(repositories[i])
-            }
-            self.repositoriesPerPage += 10
-        }
-
-        DispatchQueue.main.async {
-            self.repositoriesTableView.reloadData()
-        }
-    }
-
     // MARK: - TextField DidChange
 
     @objc func textFieldDidChange(_ textField: UITextField) {
-        var filterdItemsArray = [Repository]()
-        func filterContentForSearchText(searchText: String) {
-            filterdItemsArray = repositoriesWithoutFilteration.filter { item in
-                return (item.repositoryName?.lowercased().contains(searchText.lowercased()))!
-            }
-        }
-        if textField.text == "" {
-            filterContentForSearchText(searchText: textField.text ?? "")
-            paginationRepositories = repositoriesWithoutFilteration
-        } else if textField.text?.count ?? 0 >= 2 {
-            filterContentForSearchText(searchText: textField.text ?? "")
-            paginationRepositories = filterdItemsArray
-        }
-
-        DispatchQueue.main.async {
-            self.repositoriesTableView.reloadData()
-        }
+        viewModel.textFieldDidChange(query: textField.text ?? "")
     }
 }
 
@@ -128,14 +75,15 @@ class RepositoriesViewController: UIViewController {
 
 extension RepositoriesViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        paginationRepositories.count
+        viewModel.paginationRepositoriesCount
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = repositoriesTableView.dequeueReusableCell(withIdentifier: String(describing: RepositoryTableViewCell.self), for: indexPath) as?  RepositoryTableViewCell else {
             return UITableViewCell()
         }
-        cell.configureCell(with: paginationRepositories[indexPath.row])
+        let model = viewModel.getCellModel(for: indexPath.row)
+        cell.configureCell(with: model)
 
         return cell
     }
@@ -149,16 +97,14 @@ extension RepositoriesViewController: UITableViewDelegate {
 
         if scrollView == repositoriesTableView {
             if (scrollView.contentOffset.y + scrollView.frame.size.height) >= scrollView.contentSize.height {
-
-                setPaginationRepositories(repositoriesPerPage: repositoriesPerPage)
+                viewModel.setPaginationRepositories()
             }
         }
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
     {
-        let newViewController = RepositoriesDetailsViewController()
-        self.navigationController?.pushViewController(newViewController, animated: true)
+        self.viewModel.onSelect(index: indexPath.row)
     }
 }
 

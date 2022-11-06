@@ -11,16 +11,19 @@ class APIService {
 
     static let sharedService = APIService()
 
-    func getReprositories(completion: @escaping(_ reprositories: [Repository]?, _ error: Error?) -> Void) {
+    func request<T: Decodable>(url: String, completion: @escaping(Result<T,Error>) -> Void) {
 
-        guard let url = URL(string: "https://api.github.com/repositories") else { return }
+        guard let url = URL(string: url) else { return }
 
         let session = URLSession.shared
         let request = URLRequest(url: url)
 
         let task = session.dataTask(with: request) { data, response, error in
 
-            guard error == nil else { return }
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
 
             guard let data = data else {
                 return
@@ -28,13 +31,13 @@ class APIService {
 
             do {
                 let decoder = JSONDecoder()
-                let response = try decoder.decode([Repository].self, from: data )
+                let response = try decoder.decode(T.self, from: data )
                 debugPrint(response)
-                completion(response, nil)
+                completion(.success(response))
 
             } catch {
                 debugPrint(error.localizedDescription)
-                completion(nil, error)
+                completion(.failure(error))
             }
         }
         task.resume()
